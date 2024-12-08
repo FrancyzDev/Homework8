@@ -1,189 +1,152 @@
 ﻿#include <iostream>
-#include <string>
-class Customer;
-class RoomBooking {
+using namespace std;
+
+class MyInt
+{
 private:
-	int roomNumber;
-	int* daysBooked;
-	size_t daysCount;
-	Customer* customer;
+	int value;
 public:
-	RoomBooking(int newRoomNumber, int* newDaysBooked, size_t newDaysCount, Customer* newCustomer)
-		: roomNumber(newRoomNumber), daysBooked(newDaysBooked), daysCount(newDaysCount), customer(newCustomer) {}
-	RoomBooking(int newRoomNumber, int* newDaysBooked, size_t newDaysCount) : roomNumber(newRoomNumber), daysBooked(newDaysBooked), daysCount(newDaysCount) {}
-	RoomBooking() : RoomBooking(0, nullptr, 0, nullptr) {};
-	RoomBooking(const RoomBooking & obj) {
-		roomNumber = obj.roomNumber;
-		daysCount = obj.daysCount;
-		daysBooked = new int[daysCount];
-		for (size_t i = 0; i < daysCount; ++i) {
-			daysBooked[i] = obj.daysBooked[i];
-		}
-		customer = obj.customer;
-	};
-	RoomBooking(RoomBooking&& obj) noexcept
-		: roomNumber(obj.roomNumber), daysBooked(obj.daysBooked),
-		daysCount(obj.daysCount), customer(obj.customer) {
-		obj.daysBooked = nullptr;
-		obj.customer = nullptr;
-		obj.daysCount = 0;
+	MyInt(int value)
+	{
+		this->value = value;
 	}
-
-	~RoomBooking() {
-		delete[] daysBooked;
+	void SetData(int value)
+	{
+		this->value = value;
 	}
-
-	void addDay(int day) {
-		int* newDays = new int[daysCount + 1];
-		for (size_t i = 0; i < daysCount; ++i) {
-			newDays[i] = daysBooked[i];
-		}
-		newDays[daysCount] = day;
-		delete[] daysBooked;
-		daysBooked = newDays;
-		daysCount += 1;
+	int GetData() const
+	{
+		return value;
 	}
-	void removeDay(int day) {
-		size_t index = -1;
-		for (size_t i = 0; i < daysCount; ++i) {
-			if (daysBooked[i] == day) {
-				index = i;
-				break;
-			}
-		}
-		if (index == -1) return;
-		int* newDays = new int[daysCount - 1];
-		for (size_t i = 0, j = 0; i < daysCount; ++i) {
-			if (i != index) {
-				newDays[j] = daysBooked[i];
-				j++;
-			}
-		}
-		delete[] daysBooked;
-		daysBooked = newDays;
-		daysCount -= 1;
-	}
-
-	void printBooking() {
-		std::cout << "Room Number: " << roomNumber << std::endl << "Days Booked: ";
-		for (size_t i = 0; i < daysCount; ++i) {
-			std::cout << daysBooked[i] << " ";
-		}
-	}
-
-	RoomBooking& operator=(const RoomBooking& obj) {
-		if (this == &obj) return *this;
-		delete[] daysBooked;
-		roomNumber = obj.roomNumber;
-		daysCount = obj.daysCount;
-		daysBooked = new int[daysCount];
-		for (size_t i = 0; i < daysCount; ++i) {
-			daysBooked[i] = obj.daysBooked[i];
-		}
-		customer = obj.customer;
-		return *this;
-	}
-	RoomBooking& operator=(RoomBooking&& obj) noexcept {
-		if (this == &obj) return *this;
-		delete[] daysBooked;
-		roomNumber = obj.roomNumber;
-		daysBooked = obj.daysBooked;
-		daysCount = obj.daysCount;
-		customer = obj.customer;
-		obj.daysBooked = nullptr;
-		obj.customer = nullptr;
-		obj.daysCount = 0;
-		return *this;
-	}
-	RoomBooking operator+(const RoomBooking& obj) {
-		if (customer != obj.customer) {
-			std::cout << "Can't assign booking day to another customer";
-		}
-		int* newDays = new int[daysCount + obj.daysCount];
-		for (size_t i = 0; i < daysCount; ++i) {
-			newDays[i] = daysBooked[i];
-		}
-		for (size_t i = 0; i < obj.daysCount; ++i) {
-			newDays[daysCount + i] = obj.daysBooked[i];
-		}
-		return RoomBooking(roomNumber, newDays, daysCount + obj.daysCount, customer);
-	}
-	friend std::ostream& operator<<(std::ostream& stream, const RoomBooking& obj);
 };
-std::ostream& operator<<(std::ostream& stream, const RoomBooking& obj) {
-	stream << "Room Number: " << obj.roomNumber << std::endl << "Days Booked: ";
-	for (size_t i = 0; i < obj.daysCount; ++i) {
-		stream << obj.daysBooked[i] << " ";
-	}
-	return stream;
-}
 
-class Customer {
+class Node
+{
 private:
-	std::string name;
-	int customerID;
-	RoomBooking* currentBooking;
+	MyInt myInt;
+	Node* next /*= nullptr*/;
 public:
-	Customer(std::string newName, int newCustomerID) : name(newName), customerID(newCustomerID), currentBooking(nullptr) {}
+	Node(MyInt myInt) : myInt(myInt), next(nullptr) {}
+	MyInt GetMyInt() const
+	{
+		return myInt;
+	}
+	void SetMyInt(MyInt myInt)
+	{
+		this->myInt = myInt;
+	}
+	Node* GetNext() const
+	{
+		return next;
+	}
+	void SetNext(Node* next)
+	{
+		this->next = next;
+	}
+};
 
-	Customer(const Customer & obj) : name(obj.name), customerID(obj.customerID), currentBooking(obj.currentBooking) {}
-	Customer() : name("None"), customerID(0), currentBooking(nullptr) {};
-	~Customer() {
-		delete currentBooking;
+class LinkedList
+{
+private:
+	Node* head;
+	size_t size;
+public:
+	LinkedList() : head(nullptr), size(0) {}
+	size_t GetSize() const
+	{
+		return size;
 	}
-	void makeBooking(RoomBooking * booking) {
-		if (currentBooking != nullptr) {
-			delete currentBooking;
+	void InsertAtEnd(MyInt value)
+	{
+		if (head == nullptr)
+		{
+			InsertAtBeginning(value);
+			return;
 		}
-		currentBooking = booking;
+		Node* newNode = new Node(value);
+
+		Node* temp = head;
+		while (temp->GetNext() != nullptr)
+		{
+			temp = temp->GetNext();
+		}
+		temp->SetNext(newNode);
+		size++;
 	}
-	void cancelBooking() {
-		delete currentBooking;
-		currentBooking = nullptr;
+	void InsertAtBeginning(MyInt value)
+	{
+		Node* newNode = new Node(value);
+		newNode->SetNext(head);
+		head = newNode;
+		size++;
 	}
-	void printCustomerInfo() {
-		std::cout << "Customer Name: " << name << std::endl << "Customer ID: " << customerID;
-		if (currentBooking) {
-			std::cout << std::endl << "Current Booking: " << std::endl << *currentBooking;
+	void DeleteFromBeginning() {
+		if (head == nullptr) return;
+		Node* temp = head;
+		head = head->GetNext();
+		delete temp;
+		size--;
+	}
+
+	void DeleteFromEnd() {
+		if (head == nullptr) return;
+		if (head->GetNext() == nullptr)
+		{
+			delete head;
+			head = nullptr;
+			size--;
+			return;
+		}
+		Node* temp = head;
+		while (temp->GetNext()->GetNext() != nullptr)
+		{
+			temp = temp->GetNext();
+		}
+		delete temp->GetNext();
+		temp->SetNext(nullptr);
+		size--;
+	}
+
+	const MyInt& operator[](size_t index) {
+		if (index >= size) std::cout << "Index out of range" << std::endl;
+		Node* temp = head;
+		for (size_t i = 0; i < index; ++i)
+		{
+			temp = temp->GetNext();
+		}
+		return temp->GetMyInt();
+	}
+	Node * Begin() {
+		return head;
+	}
+	~LinkedList()
+	{
+		while (head != nullptr)
+		{
+			Node* temp = head;
+			head = head->GetNext();
+			delete temp;
+		}
+	}
+};
+
+int main()
+{
+	LinkedList* list = new LinkedList();
+	list->InsertAtBeginning(MyInt(5));
+	list->InsertAtEnd(7);
+	list->InsertAtEnd(4);
+	list->InsertAtEnd(3);
+	list->DeleteFromEnd();
+	list->DeleteFromBeginning();
+	std::cout << "Get element with index 1: " << list->operator[](1).GetData() << std::endl;
+	std::cout << "Loop through list: " << std::endl;
+	for (Node* it = list->Begin(); it != nullptr; it = it->GetNext()) {
+		if (it->GetNext() == nullptr) {
+			std::cout << it->GetMyInt().GetData();
 		}
 		else {
-			std::cout << std::endl << "No current booking";
+			std::cout << it->GetMyInt().GetData() << " ";
 		}
 	}
-	friend std::ostream& operator<< (std::ostream& stream, const Customer& obj);
-};
-
-
-std::ostream& operator<< (std::ostream& stream, const Customer& obj) {
-	return stream << "Name: " << obj.name << std::endl << "Customer ID: " << obj.customerID;
 }
-
-#include <iostream>
-#include <string>
-
-
-int main() {
-	Customer customer1("Artem", 228);
-	Customer customer2("Test2", 1337);
-	int* days1 =  new int [3] { 1, 2, 3 };
-	int * days2 = new int[2] { 4, 5 };
-	int* days3 = new int[2] { 7, 11 };
-	RoomBooking booking1(101, days1, 3, &customer1);
-	RoomBooking booking2(102, days2, 2, &customer2);
-	booking1.printBooking();
-	std::cout << std::endl;
-	booking2.printBooking();
-	std::cout << std::endl << "Adding and removing days: " << std::endl;
-	booking1.addDay(4);
-	booking1.removeDay(2);
-	booking1.printBooking();
-	std::cout << std::endl << "Assigning booking to customer: " << std::endl;
-	Customer customer3("Test3", 12);
-	customer3.makeBooking(new RoomBooking(105, days3, 2, &customer3));
-	customer3.printCustomerInfo();
-	std::cout << std::endl << "Canceling booking: " << std::endl;
-	customer1.cancelBooking();
-	customer1.printCustomerInfo();
-	return 0;
-}
-
