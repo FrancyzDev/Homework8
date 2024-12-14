@@ -5,10 +5,38 @@
 template <typename T>
 class Queue {
 private:
-    struct Node {
+    class Node
+    {
+    private:
         T data;
         Node* next;
-        Node(T value) : data(value), next(nullptr) {}
+        Node* prev;
+    public:
+        Node(T data) : data(data), next(nullptr), prev(nullptr) {}
+        T& GetData()
+        {
+            return data;
+        }
+        void SetData(T data)
+        {
+            this->data = data;
+        }
+        Node* GetNext() const
+        {
+            return next;
+        }
+        void SetNext(Node* next)
+        {
+            this->next = next;
+        }
+        Node* GetPrev() const
+        {
+            return prev;
+        }
+        void SetPrev(Node* prev)
+        {
+            this->prev = prev;
+        }
     };
     Node* front;
     Node* rear;
@@ -18,207 +46,183 @@ public:
     Queue() : front(nullptr), rear(nullptr), size(0) {}
     ~Queue() {
         while (!isEmpty()) {
-            dequeue();
+            DequeueFront();
         }
     }
-    void enqueue(const T& value) {
+    void EnqueueBack(const T& value) {
         Node* newNode = new Node(value);
-        if (rear) {
-            rear->next = newNode;
+        if (rear == nullptr) {
+            front = newNode;
+            rear = newNode;
         }
         else {
-            front = newNode;
+            rear->SetNext(newNode);
+            newNode->SetPrev(rear);
+            rear = newNode;
         }
-        rear = newNode;
         ++size;
     }
-    void dequeue() {
-        if (isEmpty()) {
-            std::cout << "Queue is empty";
+
+    void EnqueueFront(const T& value) {
+        Node* newNode = new Node(value);
+        if (rear == nullptr) {
+            front = newNode;
+            rear = newNode;
+        }
+        else {
+            newNode->SetNext(front);
+            front->SetPrev(newNode);
+            front = newNode;
+        }
+        ++size;
+    }
+
+    T& Front() {
+        if (front == nullptr) {
+            throw std::runtime_error("Queue is empty!");
+        }
+        return front->GetData();
+    }
+
+    T Front() const {
+        return Front();
+    }
+
+    T& Back() {
+        if (rear == nullptr) {
+            throw std::runtime_error("Queue is empty!");
+        }
+        return rear->GetData();
+    }
+
+    T Back() const {
+        return Back();
+    }
+
+    void DequeueFront() {
+        if (front == nullptr) {
+            return;
         }
         Node* temp = front;
-        front = front->next;
-        if (!front) {
+        front = front->GetNext();
+        if (front == nullptr) {
             rear = nullptr;
         }
         delete temp;
-        --size;
+        size--;
     }
-    T peek() const {
-        if (isEmpty()) {
-            std::cout << "Queue is empty" << std::endl;
+
+    void DequeueBack() {
+        if (rear == nullptr) {
+            return;
         }
-        return front->data;
+        Node* temp = rear;
+        rear = rear->GetPrev();
+        if (rear == nullptr) {
+            front = nullptr;
+        }
+        delete temp;
+        size--;
     }
+
     bool isEmpty() const { return size == 0; }
-    size_t getSize() const { return size; }
+    size_t Size() const { return size; }
 };
 
-// TEMPLATE TWO LINKED LIST
-template <typename T>
-class LinkedList {
-private:
-    struct Node {
-        T data;
-        Node* prev;
-        Node* next;
-        Node(T value) : data(value), prev(nullptr), next(nullptr) {}
-    };
-    Node* head;
-    Node* tail;
-    size_t size;
 
+template<typename T>
+class Stack {
+private:
+    class Node
+    {
+    private:
+        T data;
+        Node* next;
+    public:
+        Node(T data) : data(data), next(nullptr) {}
+        T& GetData()
+        {
+            return data;
+        }
+        void SetData(T data)
+        {
+            this->data = data;
+        }
+        Node* GetNext() const
+        {
+            return next;
+        }
+        void SetNext(Node* next)
+        {
+            this->next = next;
+        }
+    };
+    Node* top;
+    size_t size;
 public:
-    LinkedList() : head(nullptr), tail(nullptr), size(0) {}
-    ~LinkedList() {
-        while (head) {
-            Node* temp = head;
-            head = head->next;
+    Stack() : top(nullptr), size(0) {}
+    size_t GetSize() const {
+        return size;
+    }
+    void Push(T data) {
+        Node* newNode = new Node(data);
+        newNode->SetNext(top);
+        top = newNode;
+        size++;
+    }
+
+    T& Peek() {
+        if (top == nullptr) {
+            throw std::runtime_error("Stack is empty!");
+        }
+        return top->GetData();
+    }
+    const T Peek() const {
+        return Peek();
+    }
+    void Pop() {
+        if (top == nullptr) {
+            throw std::runtime_error("Stack is empty");
+        }
+        Node* temp = top;
+        top = top->GetNext();
+        delete temp;
+        size--;
+    }
+    ~Stack() {
+        while (top != nullptr) {
+            Node* temp = top;
+            top = top->GetNext();
             delete temp;
         }
     }
-    void ShowList() const {
-        Node* temp = head;
-        std::cout << "Show list:" << std::endl;
-        while (temp != nullptr) {
-            std::cout << temp->data << " ";
-            temp = temp->next;
-        }
-        std::cout << std::endl;
-    }
-    void pushFront(const T& value) {
-        Node* newNode = new Node(value);
-        newNode->next = head;
-        if (head) {
-            head->prev = newNode;
-        }
-        else {
-            tail = newNode;
-        }
-        head = newNode;
-        ++size;
-    }
-    void pushBack(const T& value) {
-        Node* newNode = new Node(value);
-        newNode->prev = tail;
-        if (tail) {
-            tail->next = newNode;
-        }
-        else {
-            head = newNode;
-        }
-        tail = newNode;
-        ++size;
-    }
-    void popFront() {
-        if (!head) {
-            std::cout << "List is empty";
-        }
-        Node* temp = head;
-        head = head->next;
-        if (head) {
-            head->prev = nullptr;
-        }
-        else {
-            tail = nullptr;
-        }
-        delete temp;
-        --size;
-    }
-    void popBack() {
-        if (!tail) {
-            std::cout << "List is empty";
-        }
-        Node* temp = tail;
-        tail = tail->prev;
-        if (tail) {
-            tail->next = nullptr;
-        }
-        else {
-            head = nullptr;
-        }
-        delete temp;
-        --size;
-    }
-    bool isEmpty() const { return size == 0; }
-    size_t getSize() const { return size; }
 };
 
-// TEMPLATE SINGLE LIST
-template <typename T>
-class SingleLinkedList {
-private:
-    struct Node {
-        T data;
-        Node* next;
-        Node(T value) : data(value), next(nullptr) {}
-    };
-    Node* head;
-    size_t size;
-
-public:
-    SingleLinkedList() : head(nullptr), size(0) {}
-
-    ~SingleLinkedList() {
-        while (head) {
-            Node* temp = head;
-            head = head->next;
-            delete temp;
-        }
-    }
-    void ShowList() const {
-        Node* temp = head;
-        std::cout << "Show single list:" << std::endl;
-        while (temp != nullptr) {
-            std::cout << temp->data << " ";
-            temp = temp->next;
-        }
-        std::cout << std::endl;
-    }
-    void pushFront(const T& value) {
-        Node* newNode = new Node(value);
-        newNode->next = head;
-        head = newNode;
-        ++size;
-    }
-
-    void popFront() {
-        if (!head) {
-            std::cout << "List is empty" << std::endl;
-        }
-        Node* temp = head;
-        head = head->next;
-        delete temp;
-        --size;
-    }
-    bool isEmpty() const { return size == 0; }
-    size_t getSize() const { return size; }
-};
 
 int main() {
-    Queue<int> q;
-    q.enqueue(1);
-    q.enqueue(2);
-    std::cout << "Queue front: " << q.peek() << std::endl;
-    std::cout << "Dequeue" << std::endl;
-    q.dequeue();
-    std::cout << "Now queue front: " << q.peek() << std::endl;
-    std::cout << "Create double list" << std::endl;
-    LinkedList<int> dll;
-    std::cout << "Fill double list" << std::endl;
-    dll.pushFront(10);
-    dll.pushBack(20);
-    dll.ShowList();
-    std::cout << "popFront method called" << std::endl;
-    dll.popFront();
-    dll.ShowList();
-    std::cout << "Create single list" << std::endl;
-    SingleLinkedList<int> sll;
-    sll.pushFront(5);
-    std::cout << "pushFront 5" << std::endl;
-    sll.ShowList();
-    std::cout << "popFront method called" << std::endl;
-    sll.popFront();
-    sll.ShowList();
+    Queue<int> queue;
+    queue.EnqueueBack(9);
+    queue.EnqueueBack(1);
+    queue.EnqueueBack(5);
+    queue.EnqueueBack(7);
+    queue.EnqueueBack(3);
+
+    for (size_t i = queue.Size(); i > 0; --i) {
+        std::cout << queue.Front() << std::endl;
+        queue.DequeueFront();
+    }
+    std::cout << std::endl;
+
+    Stack<int> stack;
+    stack.Push(1);
+    stack.Push(2);
+    stack.Push(6);
+    stack.Push(9);
+    stack.Push(123);
+    while (stack.GetSize() != 0) {
+        std::cout << stack.Peek() << std::endl;
+        stack.Pop();
+    }
+
     return 0;
 }
