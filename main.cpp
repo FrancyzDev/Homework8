@@ -1,92 +1,208 @@
 ﻿#include <iostream>
 #include <string>
+#include <random>
 using namespace std;
 
-// TASK1
-class Person {
+//TASK1
+class Shape {
 private:
-	string name;
-	int age;
+
 public:
-	Person(string name, int age) : name(name), age(age) {}
-	virtual ~Person() {}
-	virtual string getInfo() {
-		return "Name: " + name + ", Age: " + to_string(age);
+	virtual ~Shape() = default;
+	virtual double CalculateArea() = 0;
+	virtual void Print() = 0;
+};
+
+class Rectangle : public Shape {
+private:
+	double height;
+	double width;
+public:
+	Rectangle(double height, double width) :height(height), width(width) {}
+	
+	double CalculateArea() 
+	{
+		return height * width;
+	}
+
+	void Print() 
+	{
+		std::cout << "Type: Rectangle" << "\nHeight: " << height << "\nWidth: " << width << "\nArea: " << CalculateArea() << endl;
 	}
 };
 
-class Child : public Person {
+
+class Circle : public Shape {
 private:
-	string parentName;
+	double radius;
 public:
-	Child(string name, int age, string parentName) : Person(name, age), parentName(parentName) {}
-	string getInfo() {
-		return Person::getInfo() + ", Parent: " + parentName;
+	Circle(double radius) : radius(radius) {}
+
+	double CalculateArea()
+	{
+		return 3.14 * (radius * radius);
+	}
+
+	void Print()
+	{
+		std::cout << "Type: Circle" << "\nRadius: " << radius << "\nArea: " << CalculateArea() << endl;
 	}
 };
+
+
+class Triangle : public Shape {
+private:
+	double height;
+	double osnova;
+public:
+	Triangle(double height, double osnova) : height(height), osnova(osnova) {}
+
+	double CalculateArea()
+	{
+		return height * osnova / 2;
+	}
+
+	void Print()
+	{
+		std::cout << "Type: Triangle" << "\nHeight: " << height << "\nOsnova: " << osnova << "\nArea: " << CalculateArea() << endl;
+	}
+};
+
+
 
 //TASK2
-class Vehicle {
+class Animal {
 private:
-	string brand;
-	int year;
+
 public:
-	Vehicle(string brand, int year) : brand(brand), year(year) {};
-	virtual string getDescription() {
-		return "Brand: " + brand + ", Year" + to_string(year);
-	}
-	virtual ~Vehicle() {}
+	virtual ~Animal() = default;
+	virtual void MakeSound() = 0;
+	virtual void PrintInfo() = 0;
 };
 
-class Car : public Vehicle {
-private:
-	string model;
-	int mileage;
+class Dog : public Animal {
 public:
-	Car(string brand, int year, string model, int mileage) : Vehicle(brand, year), model(model), mileage(mileage) {}
-	~Car() {}
-	string getDescription() {
-		return Vehicle::getDescription() + ", Model: " + model + ", Mileage: " + to_string(mileage) + "km";
+	void MakeSound()
+	{
+		std::cout << "Gav!" << std::endl;
+	}
+
+	void PrintInfo()
+	{
+		std::cout << "This is a dog" << endl;
 	}
 };
+
+
+class Cat : public Animal {
+public:
+	void MakeSound()
+	{
+		std::cout << "Meow!" << std::endl;
+	}
+
+	void PrintInfo()
+	{
+		std::cout << "This is a cat" << endl;
+	}
+};
+
+
+class Bird : public Animal {
+public:
+	void MakeSound()
+	{
+		std::cout << "Cvirin'!" << std::endl;
+	}
+
+	void PrintInfo()
+	{
+		std::cout << "This is a bird" << endl;
+	}
+};
+
 
 //TASK3
-class Employee {
-private:
-	string name;
-	string position;
-	double salary;
+class Account {
+protected:
+	double balance;
 public:
-	Employee(string name, string postion, double salary) : name(name), position(position), salary(salary) {}
-	virtual ~Employee() {}
-	virtual string getDetails() {
-		return "Name: " + name + ", Position: " + position + ", Salary: " + to_string(salary);
+	virtual ~Account() = default;
+	virtual void CalculateInterest() = 0;
+	virtual void Deposit(double amount) {
+		if (amount > 0) balance += amount;
+		else std::cout << "Deposit must be positive value" << endl;
 	}
 };
 
-class Manager : public Employee {
-private:
-	string department;
+class SavingsAccount : public Account {
 public:
-	Manager(string name, string position, double salary, string department) : Employee(name, position, salary), department(department) {};
-	~Manager() {}
-	string getDetails() {
-		return Employee::getDetails() + ", Department: " + department;
+	void CalculateInterest()
+	{
+		std::cout << "Start balance: " << balance << endl;
+		balance *= 1.05;
+		std::cout << "Balance aftert calculation: " << balance << endl;
 	}
 };
+
+class CheckingAccount : public Account {
+public:
+	void CalculateInterest()
+	{
+		std::cout << "Start balance: " << balance << endl;
+		balance *= 0.98;
+		std::cout << "Balance aftert calculation: " << balance << endl;
+	}
+};
+
+class FixedDepositAccount : public Account {
+public:
+	void CalculateInterest()
+	{
+		std::cout << "Start balance: " << balance << endl;
+		if (rand() % 2)
+		{
+			balance *= 1.10;
+			std::cout << "Balance aftert calculation: " << balance << endl;
+		}
+		else {
+			std::cout << "Error it is fixed deposit account, you can't calculate interest now, try later" << endl;
+		}
+	}
+};
+
+
 
 int main() {
+	srand(time(0));
 	//TASK1
-	Person Test1Person("Testik", 32);
-	Child Test1Child("Test1", 12, "Tetsik");
-	cout << Test1Person.getInfo() << endl << Test1Child.getInfo() << endl;
+	Shape* arr[3];
+	arr[0] = new Rectangle(5.0, 3.0);
+	arr[1] = new Circle(4.0);
+	arr[2] = new Triangle(6.0, 2.5);
+	for (int i = 0; i < 3; ++i) {
+		arr[i]->Print();
+		delete arr[i];
+	}
 	//TASK2
-	Vehicle Test1Vehicle("BMW", 2022);
-	Car Test1Car("BMW", 2022, "IX8700", 400);
-	cout << Test1Vehicle.getDescription() << endl << Test1Car.getDescription() << endl;
+	Animal* arr1[3];
+	arr1[0] = new Dog();
+	arr1[1] = new Cat();
+	arr1[2] = new Bird();
+	for (int i = 0; i < 3; ++i) {
+		arr1[i]->MakeSound();
+		arr1[i]->PrintInfo();
+		delete arr1[i];
+	}
 	//TASK3
-	Employee Test1Employee("Alice", "Developer", 50000.00);
-	Manager Test1Manager("Alice", "Developer", 50000.00, "IT");
-	cout << Test1Employee.getDetails() << endl << Test1Manager.getDetails() << endl;
+	Account* arr2[3];
+	arr2[0] = new SavingsAccount();
+	arr2[1] = new CheckingAccount();
+	arr2[2] = new FixedDepositAccount();
+	for (int i = 0; i < 3; ++i) {
+		arr2[i]->Deposit(100);
+		arr2[i]->CalculateInterest();
+		delete arr2[i];
+	}
 	return 0;
 }
